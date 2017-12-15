@@ -47,6 +47,8 @@ saveRDS(Gene_GC_hg19,"/Users/zhenwei/Datasets/GC_content_Genes/Gene_GC_hg19.rds"
 saveRDS(Gene_GC_mm10,"/Users/zhenwei/Datasets/GC_content_Genes/Gene_GC_mm10.rds")
 
 #GC content for each feature (Granges)
+Gene_GC_mm10 <- readRDS("/Users/zhenwei/Datasets/GC_content_Genes/Gene_GC_mm10.rds")
+
 fol <- findOverlaps( rowRanges( se_mm10 ), Gene_GC_mm10 )
 
 GC_cont = rep(NA,nrow(se_mm10))
@@ -54,7 +56,17 @@ GC_cont = rep(NA,nrow(se_mm10))
 GC_cont[queryHits(fol)] = mcols(Gene_GC_mm10)[subjectHits(fol),]
 
 
-mean(is.na(GC_cont))
+mean(is.na(GC_cont)) #Notice that there are ~ 11% sites do not belong to exons.
 
 GC_idx_feature = GC_cont
-#Notice that there are ~ 11% sites do not belong to exons.
+
+
+ds_result <- meripQC::DESeq2_merip(se_M,MODE = "DM")
+saveRDS(ds_result,"example_dds_DM.rds")
+ds_result <- meripQC::DESeq2_merip(se_M,MODE = "Meth")
+saveRDS(ds_result,"example_dds_Meth.rds")
+
+drs_DM <- readRDS("example_dds_DM.rds")
+se_M <- readRDS("example_dds_Meth.rds")
+Decision_dsresult(drs_DM,1,0,0.05,5000,T,"hyper","Fto midbr")
+

@@ -4,10 +4,11 @@
 \alias{meRIP_mod_QC_report}
 \title{Generate quality control report of a single MeRIP data site.}
 \usage{
-meRIP_mod_QC_report(se_M, txdb, save_title = "modX", save_dir = getwd(),
-  gtcoord = NULL, DeSeq2_p_threshold = NULL, DeSeq2_fdr_threshold = NULL,
-  log2FC_cutoff = 0, min_num_Mod = 10000, Save_DESeq2_result = TRUE,
-  GC_idx_feature = NULL)
+meRIP_mod_QC_report(se_M, txdb = NULL, save_title = "modX",
+  save_dir = getwd(), gtcoord = NULL, DeSeq2_p_threshold = NULL,
+  DeSeq2_fdr_threshold = NULL, log2FC_cutoff = 0, min_num_Mod = 10000,
+  Save_DESeq2_result = TRUE, GC_idx_feature = NULL, DM_analysis = FALSE,
+  Expected_change = NULL, PCA_PLOT = FALSE)
 }
 \arguments{
 \item{se_M}{A \code{SummarizedExperiment} object containing the counts of each modification sites of each bam files. Appropriate \code{colData} and \code{rowRanges} should be available.
@@ -38,7 +39,14 @@ The Wald test is conducted on the coefficient estimate of the second term I(IP).
 
 \item{Save_DESeq2_result}{Whether to save the DESeq2 result, default setting is TRUE.}
 
-\item{GC_idx_feature}{Optional: the GC content values for each features (rows) of the count matrix.}
+\item{GC_idx_feature}{Optional: The GC content values for each features (rows) of the count matrix.}
+
+\item{DM_analysis}{Optional: Whether to conduct differential methylation analysis or not, default setting is FALSE.}
+
+\item{Expected_change}{Optional: could be either "hyper" and "hypo", indicating the expected change of treated condition over input condition,}
+
+\item{PCA_PLOT}{Whether to plot the PCA plot in DESeq2, default setting is FALSE, it is slow because it requires rlog transformation.
+this is useful when inferring the target sites of RNA modification writers or erasers from the MeRIP Seq data. Default setting is NULL.}
 }
 \value{
 This function will write files and plots under the directory provided by \code{save_dir}
