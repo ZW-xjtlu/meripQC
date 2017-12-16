@@ -118,7 +118,7 @@ meRIP_mod_QC_report <-
     if(Save_DESeq2_result) saveRDS(ds_result, paste0(save_title,"_ds_result.rds"))
 
     #4. A GC content diagnosis plot for inference.
-    if(!is.null(GC_idx_feature)) Plot_GC_results(se_M,ds_result,GC_idx_feature,save_title)
+    if(!is.null(GC_idx_feature)) Plot_GC_results(ds_result,GC_idx_feature,save_title)
 
     #5. Guitar plot for methylation sites.
     Plot_ls_Gr <- as.list(split(rowRanges(se_M),ds_result$Decision))

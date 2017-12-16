@@ -70,3 +70,51 @@ drs_DM <- readRDS("example_dds_DM.rds")
 se_M <- readRDS("example_dds_Meth.rds")
 Decision_dsresult(drs_DM,1,0,0.05,5000,T,"hyper","Fto midbr")
 
+meripQC::meRIP_mod_QC_report(se_M = se_mm10[,1:8],
+                    txdb = TxDb.Mmusculus.UCSC.mm10.knownGene::TxDb.Mmusculus.UCSC.mm10.knownGene,
+                    gtcoord = Gtcoord_mm10,
+                    min_num_Mod = 5000,
+                    save_title = "FTO-3T3L1",
+                    DM_analysis = T,
+                    Expected_change = "hyper",
+                    DeSeq2_fdr_threshold = .05,
+                    PCA_PLOT = T,
+                    GC_idx_feature = GC_cont)
+
+meripQC::meRIP_mod_QC_report(se_M = se_mm10[,48:59],
+                             txdb = TxDb.Mmusculus.UCSC.mm10.knownGene::TxDb.Mmusculus.UCSC.mm10.knownGene,
+                             gtcoord = Gtcoord_mm10,
+                             min_num_Mod = 5000,
+                             save_title = "FTO-midbr",
+                             DM_analysis = T,
+                             Expected_change = "hyper",
+                             DeSeq2_fdr_threshold = .05,
+                             PCA_PLOT = T,
+                             GC_idx_feature = GC_cont)
+
+library(SummarizedExperiment)
+se_mm10 <- readRDS("/Users/zhenwei/Documents/GitHub/TREW-cons/B_COUNT_2017_12_5/se_mm10.rds")
+txdb <- TxDb.Mmusculus.UCSC.mm10.knownGene::TxDb.Mmusculus.UCSC.mm10.knownGene
+Gtcoord_mm10 <- readRDS("/Users/zhenwei/Datasets/Gtcoords/Gtcoord_mm10.rds")
+
+library(GenomicRanges)
+Gene_GC_mm10 <- readRDS("/Users/zhenwei/Datasets/GC_content_Genes/Gene_GC_mm10.rds")
+fol <- findOverlaps( rowRanges( se_mm10 ), Gene_GC_mm10 )
+GC_cont = rep(NA,nrow(se_mm10))
+GC_cont[queryHits(fol)] = mcols(Gene_GC_mm10)[subjectHits(fol),]
+
+as.data.frame( SummarizedExperiment::colData(se_mm10) )[17:28,]
+
+meripQC::meRIP_mod_QC_report(se_M = se_mm10[,17:28],
+                             txdb = TxDb.Mmusculus.UCSC.mm10.knownGene::TxDb.Mmusculus.UCSC.mm10.knownGene,
+                             gtcoord = Gtcoord_mm10,
+                             min_num_Mod = 5000,
+                             save_title = "Batch-HS",
+                             DM_analysis = F,
+                             Expected_change = NULL,
+                             DeSeq2_fdr_threshold = .05,
+                             PCA_PLOT = T,
+                             GC_idx_feature = GC_cont)
+
+
+

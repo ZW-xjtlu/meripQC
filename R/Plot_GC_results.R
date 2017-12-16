@@ -25,6 +25,7 @@ p1 <- ggplot(plot_df, aes(x =  GC_idx , y = Log2FC )) + stat_density_2d(aes(fill
 
 p2 <- ggplot(plot_df, aes(x = GC_idx, fill = Label)) + geom_density(linetype = 0, alpha = .4) + theme_classic() + xlim(c(0.25,0.75)) + scale_fill_brewer(palette = "Dark2") + labs(x = "GC contents", title = "GC content distribution", subtitle = HDER)
 
-ggsave(paste0(HDER,"_GC_bias.pdf"),p1,width = 5,height = 2.6)
-ggsave(paste0(HDER,"_GC_dist.pdf"),p2,width = 5,height = 2.6)
+suppressWarnings( suppressMessages( ggsave(paste0(HDER,"_GC_bias.pdf"),p1,width = 5,height = 2.6) ) )
+suppressWarnings( ggsave(paste0(HDER,"_GC_dist.pdf"),p2,width = 5,height = 2.6) )
+
 }

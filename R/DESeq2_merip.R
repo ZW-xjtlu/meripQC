@@ -25,7 +25,7 @@ if(MODE == "Meth") {
   Cov = ~ IPinput
   } else {
   Pert_u = as.character(SE_M$Perturbation)
-  Pert_u[Pert_u!="C"] = "Treated"
+  Pert_u[Pert_u != "C"] = "Treated"
   SE_M$Perturbation = factor( Pert_u )
   Cov = ~ Perturbation + IPinput + Perturbation:IPinput
   }
@@ -37,9 +37,9 @@ if(MODE == "DM") {
 dds <- suppressMessages( DESeq(dds) )
 
 if(PCA) {
-if(MODE == "DM") {INTGRP = c("IPinput","Perturbation")} else {INTGRP = ("IPinput")}
+if(MODE == "DM") {INTGRP = c("IPinput","Perturbation")} else {INTGRP = c("IPinput", if(any(colnames(colData(SE_M)) == "Perturbation_detail")){"Perturbation_detail"}else{NULL})}
 rld <- rlog(dds)
-ggsave(paste0(HDER,"_PCA.pdf"), plotPCA(rld,intgroup = INTGRP) + theme_classic() + scale_color_brewer(palette = "Spectral"), width = 5, height = 3)
+ggsave(paste0(HDER,"_PCA.pdf"), plotPCA(rld,intgroup = INTGRP) + theme_classic() + scale_color_brewer(palette = "Spectral"), width = 5, height = 5)
 }
 
 if(MODE == "Meth"){
