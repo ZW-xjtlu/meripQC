@@ -39,7 +39,7 @@ dds <- suppressMessages( DESeq(dds) )
 if(PCA) {
 if(MODE == "DM") {INTGRP = c("IPinput","Perturbation")} else {INTGRP = c("IPinput", if(any(colnames(colData(SE_M)) == "Perturbation_detail")){"Perturbation_detail"}else{NULL})}
 rld <- rlog(dds)
-ggsave(paste0(HDER,"_PCA.pdf"), plotPCA(rld,intgroup = INTGRP) + theme_classic() + scale_color_brewer(palette = "Spectral"), width = 5, height = 5)
+ggsave(paste0(HDER,"_PCA.pdf"), plotPCA(rld,intgroup = INTGRP) + theme_classic() + theme() + scale_color_brewer(palette = "Spectral"), width = 5, height = 5)
 }
 
 if(MODE == "Meth"){

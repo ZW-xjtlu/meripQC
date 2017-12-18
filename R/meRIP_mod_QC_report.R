@@ -65,7 +65,7 @@ meRIP_mod_QC_report <-
   function(se_M,
            txdb = NULL,
            save_title = "modX",
-           save_dir = getwd(),
+           save_dir = save_title,
            gtcoord = NULL,
            DeSeq2_p_threshold = NULL,
            DeSeq2_fdr_threshold = NULL,
@@ -77,6 +77,7 @@ meRIP_mod_QC_report <-
            Expected_change = NULL,
            PCA_PLOT = FALSE) {
     #0. directory
+    if(!dir.exists(save_dir)) dir.create(save_dir)
     setwd(save_dir)
 
     #1. A reads count bar plot.
