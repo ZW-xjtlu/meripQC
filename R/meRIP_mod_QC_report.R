@@ -54,6 +54,10 @@
 #' gtcoord = Gtcoord_mm10,
 #' min_num_Mod = 1000)
 #'
+#' #To do:
+#' 1. add QNB
+#' 2. add cqn (adjust GC content)
+#'
 #' @import DESeq2
 #' @import ggplot2
 #' @import Guitar

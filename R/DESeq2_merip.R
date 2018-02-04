@@ -2,9 +2,9 @@
 #'
 #' @description \code{DESeq2_merip} is an internal function used to infer methylation and differential methylation given merip datasets.
 #' @param SE_M A \code{SummarizedExperiment} object with 1 necessary collumn in \code{colData}: c("IP_input").
-#' @param MODE Could be either "Meth" or "DM", the later will conduct differential methylation analysis with the design:
 #' @param PCA Wheather to plot a PCA after an rlog transformation, default is FALSE.
 #' @param HDER What should be the header of the PCA plot, applied when \code{PCA} = TRUE.
+#' @param MODE Could be either "Meth" or "DM", the later will conduct differential methylation analysis with the design:
 #'
 #' log2(Q) = intercept + I(Treated) + I(IP) + I(IP):I(Treated).
 #'
