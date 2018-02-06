@@ -102,14 +102,12 @@ meRIP_mod_QC_report <-
     ds_result$Decision = "Insig"
 
     #Make decisions based on the decision table.
-    Control_index =  (ds_result[[Dcs_tb$Cut_By_ctrl]] < Dcs_tb$Cut_Val_ctrl) & (ds_result$log2FoldChange < Dcs_tb$log2FC_cut)
-    Expected_index = (ds_result[[Dcs_tb$Cut_By_expected]] < Dcs_tb$Cut_Val_expected) & (ds_result$log2FoldChange > Dcs_tb$log2FC_cut)
-
     if (Dcs_tb$Expected_dir == "< 0"){
-    tmp = Control_index
-    Control_index = Expected_index
-    Expected_index = tmp
-    tmp = NULL
+      Control_index =  (ds_result[[as.character(Dcs_tb$Cut_By_ctrl)]] < Dcs_tb$Cut_Val_ctrl) & (ds_result$log2FoldChange > Dcs_tb$log2FC_cut)
+      Expected_index = (ds_result[[as.character(Dcs_tb$Cut_By_expected)]] < Dcs_tb$Cut_Val_expected) & (ds_result$log2FoldChange < Dcs_tb$log2FC_cut)
+    } else {
+      Control_index =  (ds_result[[as.character(Dcs_tb$Cut_By_ctrl)]] < Dcs_tb$Cut_Val_ctrl) & (ds_result$log2FoldChange < Dcs_tb$log2FC_cut)
+      Expected_index = (ds_result[[as.character(Dcs_tb$Cut_By_expected)]] < Dcs_tb$Cut_Val_expected) & (ds_result$log2FoldChange > Dcs_tb$log2FC_cut)
     }
 
     if(is.null(Expected_change) & DM_analysis){
