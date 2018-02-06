@@ -56,7 +56,9 @@
 #'
 #' #To do:
 #' 1. add QNB
-#' 2. add cqn (adjust GC content)
+#' 2. add cqn (adjust GC content) / probably add GC content adjustment for CHIP-seq (if possible).
+#' 3. add plot over dispersion
+#' 4. change the save dir into paste, or record the original dir
 #'
 #' @import DESeq2
 #' @import ggplot2
@@ -81,6 +83,7 @@ meRIP_mod_QC_report <-
            Expected_change = NULL,
            PCA_PLOT = FALSE) {
     #0. directory
+    dir_org = getwd()
     if(!dir.exists(save_dir)) dir.create(save_dir)
     setwd(save_dir)
 
@@ -136,4 +139,5 @@ meRIP_mod_QC_report <-
 
     #6. Exon lengths distribution
     if(!is.null(txdb)) Plot_ex_lengths(Plot_ls_Gr,txdb,save_title)
+  setwd(dir_org)
 }
