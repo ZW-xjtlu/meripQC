@@ -18,12 +18,24 @@ library(SummarizedExperiment)
 txdb <- TxDb.Mmusculus.UCSC.mm10.knownGene::TxDb.Mmusculus.UCSC.mm10.knownGene
 se_M <- se_mm10[,grepl("midbrain", colData( se_mm10 )$Publication )]
 gtcoord <- readRDS("/Users/zhenwei/Datasets/Gtcoords/Gtcoord_mm10.rds")
-DeSeq2_p_threshold = NULL
-DeSeq2_fdr_threshold = NULL
+p_threshold = NULL
+fdr_threshold = NULL
 log2FC_cutoff = 0
 min_num_Mod = 10000
-Save_DESeq2_result = TRUE
+Save_inference_result = TRUE
 GC_idx_feature = NULL
+
+Gene_GC_mm10 <- readRDS("/Users/zhenwei/Datasets/GC_content_Genes/Gene_GC_mm10.rds")
+fol <- findOverlaps( rowRanges( se_mm10 ), Gene_GC_mm10 )
+GC_cont = rep(NA,nrow(se_mm10))
+GC_cont[queryHits(fol)] = mcols(Gene_GC_mm10)[subjectHits(fol),]
+mean(is.na(GC_cont)) #Notice that there are ~ 11% sites do not belong to exons.
+GC_idx_feature = GC_cont
+save_title = "modX"
+save_dir = save_title
+DM_analysis = T
+PCA_PLOT = F
+Expected_change = "hyper"
 
 #Extracting exons level GC content (by genes).
 Retriev_gene_GC_content <- function(txdb,bsgnm){
@@ -77,9 +89,22 @@ meripQC::meRIP_mod_QC_report(se_M = se_mm10[,1:8],
                     save_title = "FTO-3T3L1",
                     DM_analysis = T,
                     Expected_change = "hyper",
-                    DeSeq2_fdr_threshold = .05,
+                    fdr_threshold = .05,
                     PCA_PLOT = T,
                     GC_idx_feature = GC_cont)
+
+meripQC::meRIP_mod_QC_report(se_M = se_mm10[,1:8],
+                             txdb = TxDb.Mmusculus.UCSC.mm10.knownGene::TxDb.Mmusculus.UCSC.mm10.knownGene,
+                             gtcoord = Gtcoord_mm10,
+                             min_num_Mod = 5000,
+                             save_title = "FTO-3T3L1-QNB",
+                             DM_analysis = T,
+                             DM_method = "QNB",
+                             Expected_change = "hyper",
+                             fdr_threshold = .05,
+                             PCA_PLOT = T,
+                             GC_idx_feature = GC_cont)
+
 
 meripQC::meRIP_mod_QC_report(se_M = se_mm10[,48:59],
                              txdb = TxDb.Mmusculus.UCSC.mm10.knownGene::TxDb.Mmusculus.UCSC.mm10.knownGene,

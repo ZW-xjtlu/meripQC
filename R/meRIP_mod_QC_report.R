@@ -31,17 +31,18 @@
 #' @param gtcoord A variable containing guitar coordinate, which is defined by the \code{Guitar} package.
 #' @param save_dir A character string indicating the directory to save the report, by default it is the current working directory.
 #' @param save_title A character string indicating the header of the reports generated.
-#' @param DeSeq2_p_threshold A numeric value between 0 to 1, indicating the p value cut off of the Wald test defined by DESeq2, it will be neglected if \code{DeSeq2_fdr_threshold} is not NULL.
-#' @param DeSeq2_fdr_threshold A numeric value between 0 to 1, indicating the fdr cut off of the Wald test defined by DESeq2.
+#' @param p_threshold A numeric value between 0 to 1, it indicates the p value cut off of the statistical inference, it will be neglected if \code{fdr_threshold} is not NULL.
+#' @param fdr_threshold A numeric value between 0 to 1, it indicates the fdr cut off of the statistical inference.
 #'
-#' Specifically, \code{meRIP_mod_QC_report} want to call DESeq2 and infer methylation under the design log2(Q) ~ intercept + I(IP).
+#' By default, \code{meRIP_mod_QC_report} want to call DESeq2 and infer methylation under the design log2(Q) ~ intercept + I(IP).
 #' The Wald test is conducted on the coefficient estimate of the second term I(IP).
 #'
-#' @param log2FC_cutoff The log2 fold change cutoff of the DESeq2 result, default setting is 0.
-#' @param min_num_Mod The minimal number of sites inferred in the Methylation and Control groups, IP bigger than input and vice versa (for control), default is 10000.
-#' @param Save_DESeq2_result Whether to save the DESeq2 result, default setting is TRUE.
+#' @param log2FC_cutoff The log2 fold change cutoff of the inference result, default setting is 0.
+#' @param min_num_Mod The minimal number of sites inferred in the Methylation and Control groups, i.e.IP bigger than input and vice versa (for control), default setting is 10000.
+#' @param Save_inference_result Whether to save the result of the inference, default setting is TRUE.
 #' @param GC_idx_feature Optional: The GC content values for each features (rows) of the count matrix.
 #' @param DM_analysis Optional: Whether to conduct differential methylation analysis or not, default setting is FALSE.
+#' @param DM_method Decide the statistical inference method used in differential methylation procedure. The default setting is "DESeq2"; an alternative setting is "QNB", which will use the \pkg{QNB} package to compute the differential methylation statistics.
 #' @param Expected_change Optional: could be either "hyper" and "hypo", indicating the expected change of treated condition over input condition,
 #' @param PCA_PLOT Whether to plot the PCA plot in DESeq2, default setting is FALSE, it is slow because it requires rlog transformation.
 #' this is useful when inferring the target sites of RNA modification writers or erasers from the MeRIP Seq data. Default setting is NULL.
@@ -57,14 +58,15 @@
 #' #To do:
 #' 1. add QNB
 #' 2. add cqn (adjust GC content) / probably add GC content adjustment for CHIP-seq (if possible).
-#' 3. add plot over dispersion
-#' 4. change the save dir into paste, or record the original dir
+#' 3. add plot over-dispersion for both QNB and DESeq2.
+#' 4. change the save dir into paste, or record the original dir.
 #'
 #' @import DESeq2
 #' @import ggplot2
 #' @import Guitar
 #' @import GenomicFeatures
 #' @import SummarizedExperiment
+#' @import QNB
 #' @export
 
 meRIP_mod_QC_report <-
@@ -73,13 +75,14 @@ meRIP_mod_QC_report <-
            save_title = "modX",
            save_dir = save_title,
            gtcoord = NULL,
-           DeSeq2_p_threshold = NULL,
-           DeSeq2_fdr_threshold = NULL,
+           p_threshold = NULL,
+           fdr_threshold = NULL,
            log2FC_cutoff = 0,
            min_num_Mod = 10000,
-           Save_DESeq2_result = TRUE,
+           Save_inference_result = TRUE,
            GC_idx_feature = NULL,
            DM_analysis = FALSE,
+           DM_method = "DESeq2",
            Expected_change = NULL,
            PCA_PLOT = FALSE) {
     #0. directory
@@ -94,40 +97,40 @@ meRIP_mod_QC_report <-
     if(!is.null(GC_idx_feature)) Plot_GC_collumns(se_M,GC_idx_feature,save_title,DM_analysis)
 
     #3. A methylation profile report in tabular format based on DeSeq2 result.
-    # Run DeSeq2.
-    ds_result <- DESeq2_merip(se_M,MODE = ifelse(DM_analysis,"DM","Meth"),PCA = PCA_PLOT,HDER = save_title)
+    # Run Inference.
+    inf_result <- Inference_merip(se_M,MODE = ifelse(DM_analysis,"DM","Meth"),DM_METHOD = DM_method,PCA = PCA_PLOT,HDER = save_title)
 
-    # Analysis DESeq2 result and generate a decision table:
-    Dcs_tb <- Decision_dsresult(ds_result,log2FC_cutoff,DeSeq2_p_threshold,DeSeq2_fdr_threshold,min_num_Mod,DM_analysis,Expected_change,save_title)
-    ds_result$Decision = "Insig"
+    # Analysis Inference result and generate a decision table:
+    Dcs_tb <- Decision_infresult(inf_result,log2FC_cutoff,p_threshold,fdr_threshold,min_num_Mod,DM_analysis,Expected_change,save_title)
+    inf_result$Decision = "Insig"
 
     #Make decisions based on the decision table.
     if (Dcs_tb$Expected_dir == "< 0"){
-      Control_index =  (ds_result[[as.character(Dcs_tb$Cut_By_ctrl)]] < Dcs_tb$Cut_Val_ctrl) & (ds_result$log2FoldChange > Dcs_tb$log2FC_cut)
-      Expected_index = (ds_result[[as.character(Dcs_tb$Cut_By_expected)]] < Dcs_tb$Cut_Val_expected) & (ds_result$log2FoldChange < Dcs_tb$log2FC_cut)
+      Control_index =  (inf_result[[as.character(Dcs_tb$Cut_By_ctrl)]] < Dcs_tb$Cut_Val_ctrl) & (inf_result$log2FoldChange > Dcs_tb$log2FC_cut)
+      Expected_index = (inf_result[[as.character(Dcs_tb$Cut_By_expected)]] < Dcs_tb$Cut_Val_expected) & (inf_result$log2FoldChange < Dcs_tb$log2FC_cut)
     } else {
-      Control_index =  (ds_result[[as.character(Dcs_tb$Cut_By_ctrl)]] < Dcs_tb$Cut_Val_ctrl) & (ds_result$log2FoldChange < Dcs_tb$log2FC_cut)
-      Expected_index = (ds_result[[as.character(Dcs_tb$Cut_By_expected)]] < Dcs_tb$Cut_Val_expected) & (ds_result$log2FoldChange > Dcs_tb$log2FC_cut)
+      Control_index =  (inf_result[[as.character(Dcs_tb$Cut_By_ctrl)]] < Dcs_tb$Cut_Val_ctrl) & (inf_result$log2FoldChange < Dcs_tb$log2FC_cut)
+      Expected_index = (inf_result[[as.character(Dcs_tb$Cut_By_expected)]] < Dcs_tb$Cut_Val_expected) & (inf_result$log2FoldChange > Dcs_tb$log2FC_cut)
     }
 
     if(is.null(Expected_change) & DM_analysis){
-    ds_result$Decision[Control_index] = "Hypo-Meth"
-    ds_result$Decision[Expected_index] = "Hyper-Meth"
+    inf_result$Decision[Control_index] = "Hypo-Meth"
+    inf_result$Decision[Expected_index] = "Hyper-Meth"
     }
 
-    ds_result$Decision[Control_index] = "Control"
-    ds_result$Decision[Expected_index] = ifelse(!is.null(Expected_change),"Targeted","Methylated")
+    inf_result$Decision[Control_index] = "Control"
+    inf_result$Decision[Expected_index] = ifelse(!is.null(Expected_change),"Targeted","Methylated")
 
     #Save the result of the decided sites.
     write.csv(Dcs_tb, paste0(save_title,"_Dcs_tb.csv"))
 
-    if(Save_DESeq2_result) saveRDS(ds_result, paste0(save_title,"_ds_result.rds"))
+    if(Save_inference_result) saveRDS(inf_result, paste0(save_title,"_inf_result.rds"))
 
     #4. A GC content diagnosis plot for inference.
-    if(!is.null(GC_idx_feature)) Plot_GC_results(ds_result,GC_idx_feature,save_title)
+    if(!is.null(GC_idx_feature)) Plot_GC_results(inf_result,GC_idx_feature,save_title)
 
     #5. Guitar plot for methylation sites.
-    Plot_ls_Gr <- as.list(split(rowRanges(se_M),ds_result$Decision))
+    Plot_ls_Gr <- as.list(split(rowRanges(se_M),inf_result$Decision))
     Plot_ls_Gr = Plot_ls_Gr[ names(Plot_ls_Gr) != "Insig" ]
 
     if(!(is.null(gtcoord) & is.null(txdb))) {
@@ -137,5 +140,6 @@ meRIP_mod_QC_report <-
 
     #6. Exon lengths distribution
     if(!is.null(txdb)) Plot_ex_lengths(Plot_ls_Gr,txdb,save_title)
+
   setwd(dir_org)
 }

@@ -5,10 +5,11 @@
 \title{Generate quality control report of a single MeRIP data site.}
 \usage{
 meRIP_mod_QC_report(se_M, txdb = NULL, save_title = "modX",
-  save_dir = getwd(), gtcoord = NULL, DeSeq2_p_threshold = NULL,
-  DeSeq2_fdr_threshold = NULL, log2FC_cutoff = 0, min_num_Mod = 10000,
-  Save_DESeq2_result = TRUE, GC_idx_feature = NULL, DM_analysis = FALSE,
-  Expected_change = NULL, PCA_PLOT = FALSE)
+  save_dir = save_title, gtcoord = NULL, p_threshold = NULL,
+  fdr_threshold = NULL, log2FC_cutoff = 0, min_num_Mod = 10000,
+  Save_inference_result = TRUE, GC_idx_feature = NULL,
+  DM_analysis = FALSE, DM_method = "DESeq2", Expected_change = NULL,
+  PCA_PLOT = FALSE)
 }
 \arguments{
 \item{se_M}{A \code{SummarizedExperiment} object containing the counts of each modification sites of each bam files. Appropriate \code{colData} and \code{rowRanges} should be available.
@@ -26,22 +27,24 @@ Specifically, \code{colData} should be a \code{DataFrame} object including the f
 
 \item{gtcoord}{A variable containing guitar coordinate, which is defined by the \code{Guitar} package.}
 
-\item{DeSeq2_p_threshold}{A numeric value between 0 to 1, indicating the p value cut off of the Wald test defined by DESeq2, it will be neglected if \code{DeSeq2_fdr_threshold} is not NULL.}
+\item{p_threshold}{A numeric value between 0 to 1, it indicates the p value cut off of the statistical inference, it will be neglected if \code{fdr_threshold} is not NULL.}
 
-\item{DeSeq2_fdr_threshold}{A numeric value between 0 to 1, indicating the fdr cut off of the Wald test defined by DESeq2.
+\item{fdr_threshold}{A numeric value between 0 to 1, it indicates the fdr cut off of the statistical inference.
 
-Specifically, \code{meRIP_mod_QC_report} want to call DESeq2 and infer methylation under the design log2(Q) ~ intercept + I(IP).
+By default, \code{meRIP_mod_QC_report} want to call DESeq2 and infer methylation under the design log2(Q) ~ intercept + I(IP).
 The Wald test is conducted on the coefficient estimate of the second term I(IP).}
 
-\item{log2FC_cutoff}{The log2 fold change cutoff of the DESeq2 result, default setting is 0.}
+\item{log2FC_cutoff}{The log2 fold change cutoff of the inference result, default setting is 0.}
 
-\item{min_num_Mod}{The minimal number of sites inferred in the Methylation and Control groups, IP bigger than input and vice versa (for control), default is 10000.}
+\item{min_num_Mod}{The minimal number of sites inferred in the Methylation and Control groups, i.e.IP bigger than input and vice versa (for control), default setting is 10000.}
 
-\item{Save_DESeq2_result}{Whether to save the DESeq2 result, default setting is TRUE.}
+\item{Save_inference_result}{Whether to save the result of the inference, default setting is TRUE.}
 
 \item{GC_idx_feature}{Optional: The GC content values for each features (rows) of the count matrix.}
 
 \item{DM_analysis}{Optional: Whether to conduct differential methylation analysis or not, default setting is FALSE.}
+
+\item{DM_method}{Decide the statistical inference method used in differential methylation procedure. The default setting is "DESeq2"; an alternative setting is "QNB", which will use the \pkg{QNB} package to compute the differential methylation statistics.}
 
 \item{Expected_change}{Optional: could be either "hyper" and "hypo", indicating the expected change of treated condition over input condition,}
 
@@ -75,6 +78,12 @@ meRIP_mod_QC_report(se_M = se_mm10,
 txdb = TxDb.Mmusculus.UCSC.mm10.knownGene::TxDb.Mmusculus.UCSC.mm10.knownGene,
 gtcoord = Gtcoord_mm10,
 min_num_Mod = 1000)
+
+#To do:
+1. add QNB
+2. add cqn (adjust GC content) / probably add GC content adjustment for CHIP-seq (if possible).
+3. add plot over-dispersion for both QNB and DESeq2.
+4. change the save dir into paste, or record the original dir.
 
 }
 \seealso{
