@@ -38,25 +38,32 @@
 #' The Wald test is conducted on the coefficient estimate of the second term I(IP).
 #'
 #' @param log2FC_cutoff The log2 fold change cutoff of the inference result, default setting is 0.
-#' @param min_num_Mod The minimal number of sites inferred in the Methylation and Control groups, i.e.IP bigger than input and vice versa (for control), default setting is 10000.
-#' @param Save_inference_result Whether to save the result of the inference, default setting is TRUE.
+#' @param min_num_mod The minimal number of sites inferred in the Methylation and Control groups, i.e.IP bigger than input and vice versa (for control), default setting is 10000.
+#' @param save_inference_result Whether to save the result of the inference, default setting is TRUE.
 #' @param GC_idx_feature Optional: The GC content values for each features (rows) of the count matrix.
 #' @param DM_analysis Optional: Whether to conduct differential methylation analysis or not, default setting is FALSE.
 #' @param DM_method Decide the statistical inference method used in differential methylation procedure. The default setting is "DESeq2"; an alternative setting is "QNB", which will use the \pkg{QNB} package to compute the differential methylation statistics.
-#' @param Expected_change Optional: could be either "hyper" and "hypo", indicating the expected change of treated condition over input condition,
-#' @param PCA_PLOT Whether to plot the PCA plot in DESeq2, default setting is FALSE, it is slow because it requires rlog transformation.
-#' this is useful when inferring the target sites of RNA modification writers or erasers from the MeRIP Seq data. Default setting is NULL.
 #'
-#' @return This function will write files and plots under the directory provided by \code{save_dir}
+#' Liu, L., et al. (2017). "QNB: differential RNA methylation analysis for count-based small-sample sequencing data with a quad-negative binomial model." Bmc Bioinformatics 18(1): 387.
+#'
+#' @param expected_change Optional: could be either "hyper" and "hypo", indicating the expected change of treated condition over input condition, this is useful when inference of the target sites of RNA modification writers or erasers from the MeRIP Seq data. Default setting is NULL.
+#' @param PCA_plot Whether to plot the PCA plot with DESeq2, the default setting is FALSE, it can be time consuming due to the required rlog transformation in DESeq2.
+#' @param row_count_filter A non negative integer number, the methylation sites with total count (row sums) smaller than the threshold will be filtered before the statistical inference, the default setting is 0 (no filter).
+#'
+#' The row filter is recommended when dealing with sparse count matrix, it can improve the computational efficiencies of the inference process; also, for QNB method, it can increase the staistical power.
+#' If the DM_method is selected to be "QNB", the rows with 0 total counts are automatically filtered.
+#'
+#' @return This function will generate files of quality control reports under the directory provided by \code{save_dir}
 #'
 #' @examples
 #' meRIP_mod_QC_report(se_M = se_mm10,
 #' txdb = TxDb.Mmusculus.UCSC.mm10.knownGene::TxDb.Mmusculus.UCSC.mm10.knownGene,
 #' gtcoord = Gtcoord_mm10,
-#' min_num_Mod = 1000)
+#' min_num_mod = 1000)
 #'
 #' #To do:
-#' 1. add QNB
+#' 1. add QNB: done.
+#' 1.5 add 2 functions: Mod_count_denovo, Mod_count_annotation.
 #' 2. add cqn (adjust GC content) / probably add GC content adjustment for CHIP-seq (if possible).
 #' 3. add plot over-dispersion for both QNB and DESeq2.
 #' 4. change the save dir into paste, or record the original dir.
@@ -69,8 +76,9 @@
 #' @import QNB
 #' @export
 
-meRIP_mod_QC_report <-
-  function(se_M,
+meRIP_QC_report <-
+  function(
+           se_M,
            txdb = NULL,
            save_title = "modX",
            save_dir = save_title,
@@ -78,13 +86,15 @@ meRIP_mod_QC_report <-
            p_threshold = NULL,
            fdr_threshold = NULL,
            log2FC_cutoff = 0,
-           min_num_Mod = 10000,
-           Save_inference_result = TRUE,
+           min_num_mod = 10000,
+           save_inference_result = TRUE,
            GC_idx_feature = NULL,
            DM_analysis = FALSE,
            DM_method = "DESeq2",
-           Expected_change = NULL,
-           PCA_PLOT = FALSE) {
+           expected_change = NULL,
+           PCA_plot = FALSE,
+           mod_count_filter = 0
+           ) {
     #0. directory
     dir_org = getwd()
     if(!dir.exists(save_dir)) dir.create(save_dir)
@@ -98,10 +108,10 @@ meRIP_mod_QC_report <-
 
     #3. A methylation profile report in tabular format based on DeSeq2 result.
     # Run Inference.
-    inf_result <- Inference_merip(se_M,MODE = ifelse(DM_analysis,"DM","Meth"),DM_METHOD = DM_method,PCA = PCA_PLOT,HDER = save_title)
+    inf_result <- Inference_merip(se_M,MODE = ifelse(DM_analysis,"DM","Meth"),DM_METHOD = DM_method,PCA = PCA_plot,HDER = save_title, ROW_FILTER = mod_count_filter)
 
     # Analysis Inference result and generate a decision table:
-    Dcs_tb <- Decision_infresult(inf_result,log2FC_cutoff,p_threshold,fdr_threshold,min_num_Mod,DM_analysis,Expected_change,save_title)
+    Dcs_tb <- Decision_infresult(inf_result,log2FC_cutoff,p_threshold,fdr_threshold,min_num_mod,DM_analysis,expected_change,save_title)
     inf_result$Decision = "Insig"
 
     #Make decisions based on the decision table.
@@ -113,18 +123,18 @@ meRIP_mod_QC_report <-
       Expected_index = (inf_result[[as.character(Dcs_tb$Cut_By_expected)]] < Dcs_tb$Cut_Val_expected) & (inf_result$log2FoldChange > Dcs_tb$log2FC_cut)
     }
 
-    if(is.null(Expected_change) & DM_analysis){
+    if(is.null(expected_change) & DM_analysis){
     inf_result$Decision[Control_index] = "Hypo-Meth"
     inf_result$Decision[Expected_index] = "Hyper-Meth"
     }
 
     inf_result$Decision[Control_index] = "Control"
-    inf_result$Decision[Expected_index] = ifelse(!is.null(Expected_change),"Targeted","Methylated")
+    inf_result$Decision[Expected_index] = ifelse(!is.null(expected_change),"Targeted","Methylated")
 
     #Save the result of the decided sites.
     write.csv(Dcs_tb, paste0(save_title,"_Dcs_tb.csv"))
 
-    if(Save_inference_result) saveRDS(inf_result, paste0(save_title,"_inf_result.rds"))
+    if(save_inference_result) saveRDS(inf_result, paste0(save_title,"_inf_result.rds"))
 
     #4. A GC content diagnosis plot for inference.
     if(!is.null(GC_idx_feature)) Plot_GC_results(inf_result,GC_idx_feature,save_title)

@@ -5,7 +5,7 @@
 \title{Analysis MeRIP datasets with DESeq2.}
 \usage{
 Inference_merip(SE_M, MODE = "Meth", DM_METHOD = "DESeq2", PCA = FALSE,
-  HDER = "Unknown")
+  HDER = "Unknown", ROW_FILTER = 0)
 }
 \arguments{
 \item{SE_M}{A \code{SummarizedExperiment} object with 1 necessary collumn in \code{colData} named "IP_input", its content should be a character vector consists of 2 values: c("IP", "input").}

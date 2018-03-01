@@ -22,9 +22,15 @@
 #
 #' @export
 
-Inference_merip <- function(SE_M, MODE = "Meth", DM_METHOD = "DESeq2", PCA = FALSE, HDER = "Unknown") {
+Inference_merip <- function(SE_M, MODE = "Meth", DM_METHOD = "DESeq2", PCA = FALSE, HDER = "Unknown", ROW_FILTER = 0) {
 
 SE_M$IPinput = SE_M$IP_input
+
+if( MODE == "DM" & DM_METHOD == "QNB" ) ROW_FILTER = max(1,ROW_FILTER)
+
+Omit_indx <- rowSums( assay(SE_M) ) < ROW_FILTER
+
+SE_M <- SE_M[!Omit_indx,]
 
 if(MODE == "Meth") {
 
@@ -104,6 +110,14 @@ if(MODE == "Meth") {
   }
 }
 
-return(inference_rst)
+inference_rst <- as.data.frame(inference_rst)
+
+inference_return <- data.frame(matrix(NA,ncol = ncol(inference_rst), nrow = length(Omit_indx)))
+
+colnames(inference_return) = colnames(inference_rst)
+
+inference_return[!Omit_indx,] <- inference_rst
+
+return(inference_return)
 
 }
