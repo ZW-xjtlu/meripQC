@@ -1,9 +1,9 @@
 #' @title Generate quality control report of a single MeRIP data site.
 #'
-#' @description \code{meRIP_mod_QC_report} is used to generate a single quality control report for a summarized experiment object of MeRIP experiment.
+#' @description \code{meRIP_QC_report} is used to generate a single quality control report for a summarized experiment object of MeRIP experiment.
 #'
 #' @details This function is an internal function, and it defines the behavior of a single QC report on a well formated summarized experiment object of count.
-#' Under current version, \code{meRIP_mod_QC_report} supports the generation of the following reports.
+#' Under current version, \code{meRIP_QC_report} supports the generation of the following reports.
 #'
 #' 1. A reads number distribution plot.
 #'
@@ -34,7 +34,7 @@
 #' @param p_threshold A numeric value between 0 to 1, it indicates the p value cut off of the statistical inference, it will be neglected if \code{fdr_threshold} is not NULL.
 #' @param fdr_threshold A numeric value between 0 to 1, it indicates the fdr cut off of the statistical inference.
 #'
-#' By default, \code{meRIP_mod_QC_report} want to call DESeq2 and infer methylation under the design log2(Q) ~ intercept + I(IP).
+#' By default, \code{meRIP_QC_report} want to call DESeq2 and infer methylation under the design log2(Q) ~ intercept + I(IP).
 #' The Wald test is conducted on the coefficient estimate of the second term I(IP).
 #'
 #' @param log2FC_cutoff The log2 fold change cutoff of the inference result, default setting is 0.
@@ -56,7 +56,7 @@
 #' @return This function will generate files of quality control reports under the directory provided by \code{save_dir}
 #'
 #' @examples
-#' meRIP_mod_QC_report(se_M = se_mm10,
+#' meRIP_QC_report(se_M = se_mm10,
 #' txdb = TxDb.Mmusculus.UCSC.mm10.knownGene::TxDb.Mmusculus.UCSC.mm10.knownGene,
 #' gtcoord = Gtcoord_mm10,
 #' min_num_mod = 1000)
@@ -66,7 +66,7 @@
 #' 1.5 add 2 functions: Mod_count_denovo, Mod_count_annotation.
 #' 2. add cqn (adjust GC content) / probably add GC content adjustment for CHIP-seq (if possible).
 #' 3. add plot over-dispersion for both QNB and DESeq2.
-#' 4. change the save dir into paste, or record the original dir.
+#' 4. change the save dir into paste, or record the original dir. (don't reset directory at final, if you cannot complete (due to middle error), you will messup user's directory)
 #'
 #' @import DESeq2
 #' @import ggplot2
