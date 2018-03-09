@@ -28,7 +28,10 @@
 #' \code{IP_input} : a factor variable indicating whether the collumns belong to IP or input, the levels need to be c("input", "IP").
 #'
 #' @param txdb \code{TxDb} object of the corresponding \code{rowRanges}, this is either obtained from biocoductor or converted from the user provided GFF files.
-#' @param gtcoord A variable containing guitar coordinate, which is defined by the \code{Guitar} package.
+#' @param gtcoord A variable containing guitar coordinate, which is defined by the \pkg{Guitar} package.
+#'
+#' Cui X, Wei Z, Zhang L, Liu H, Sun L, Zhang s, Huang Y and Meng J (2016). “Guitar: an R/Bioconductor package for gene annotation guided transcriptomic analysis of RNA related genomic features.” BioMed Research International.
+#'
 #' @param save_dir A character string indicating the directory to save the report, by default it is the current working directory.
 #' @param save_title A character string indicating the header of the reports generated.
 #' @param p_threshold A numeric value between 0 to 1, it indicates the p value cut off of the statistical inference, it will be neglected if \code{fdr_threshold} is not NULL.
@@ -48,7 +51,7 @@
 #'
 #' @param expected_change Optional: could be either "hyper" and "hypo", indicating the expected change of treated condition over input condition, this is useful when inference of the target sites of RNA modification writers or erasers from the MeRIP Seq data. Default setting is NULL.
 #' @param PCA_plot Whether to plot the PCA plot with DESeq2, the default setting is FALSE, it can be time consuming due to the required rlog transformation in DESeq2.
-#' @param row_count_filter A non negative integer number, the methylation sites with total count (row sums) smaller than the threshold will be filtered before the statistical inference, the default setting is 0 (no filter).
+#' @param row_count_filter A non negative integer number, the methylation sites with total count (row sums) smaller than the threshold will be filtered before the statistical inference, the default setting is 5.
 #'
 #' The row filter is recommended when dealing with sparse count matrix, it can improve the computational efficiencies of the inference process; also, for QNB method, it can increase the staistical power.
 #' If the DM_method is selected to be "QNB", the rows with 0 total counts are automatically filtered.
@@ -66,7 +69,11 @@
 #' 1.5 add 2 functions: Mod_count_denovo, Mod_count_annotation.
 #' 2. add cqn (adjust GC content) / probably add GC content adjustment for CHIP-seq (if possible).
 #' 3. add plot over-dispersion for both QNB and DESeq2.
-#' 4. change the save dir into paste, or record the original dir. (don't reset directory at final, if you cannot complete (due to middle error), you will messup user's directory)
+#' 4. change the save dir into paste, or record the original dir. (don't reset directory at final, if you cannot complete (due to middle error), you will mess up user's directory)
+#' 5. The output of the inference result could not be RDS, be a readable format such as csv.
+#' 6. If some one not provide guitar coordinate (gtcoord = NULL), make the coordinate being automatically generated from txdb....
+#' 7. Organize and merge into one html report.
+#' 8. Remove unnecessary export
 #'
 #' @import DESeq2
 #' @import ggplot2
@@ -93,7 +100,7 @@ meRIP_QC_report <-
            DM_method = "DESeq2",
            expected_change = NULL,
            PCA_plot = FALSE,
-           mod_count_filter = 0
+           mod_count_filter = 5
            ) {
     #0. directory
     dir_org = getwd()
@@ -153,3 +160,4 @@ meRIP_QC_report <-
 
   setwd(dir_org)
 }
+

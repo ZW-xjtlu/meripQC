@@ -15,14 +15,20 @@
 #'
 #' An additional collumn c("Perturbation") is necessary for this option, the Perturbation collumn has to include character "C" for control condition.
 #'
-#' @return A DESeq2 result object for DESeq2 analysis; for QNB analysis, it will generate a \code{data.frame} object.
+#' @return A DESeq2 result object for DESeq2 analysis; for other analysis, it will generate a \code{data.frame} object.
 #' @import DESeq2
 #' @import QNB
+#' @import exomePeak
 #' @import ggplot2
 #
 #' @export
 
-Inference_merip <- function(SE_M, MODE = "Meth", DM_METHOD = "DESeq2", PCA = FALSE, HDER = "Unknown", ROW_FILTER = 0) {
+Inference_merip <- function(SE_M,
+                             MODE = "Meth",
+                              DM_METHOD = "DESeq2",
+                              PCA = FALSE,
+                             HDER = "Unknown",
+                            ROW_FILTER = 0) {
 
 SE_M$IPinput = SE_M$IP_input
 
@@ -85,8 +91,8 @@ if(MODE == "Meth") {
 
    if(any(Rep_Num != min(Rep_Num))) {
 
-     combine_collumns_to <- function(DF_x,column_target_num){
-       while(ncol(DF_x) > column_target_num){
+     combine_collumns_to <- function(DF_x,column_target_num) {
+       while(ncol(DF_x) > column_target_num) {
        DF_x[,1] = DF_x[,1] + DF_x[,2]
        DF_x = data.frame( cbind(DF_x[,-2]) )
        }
