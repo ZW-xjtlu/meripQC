@@ -27,7 +27,7 @@ An additional collumn c("Perturbation") is necessary for this option, the Pertur
 \item{HDER}{What should be the header of the PCA plot, applied when \code{PCA} = TRUE.}
 }
 \value{
-A DESeq2 result object for DESeq2 analysis; for QNB analysis, it will generate a \code{data.frame} object.
+A DESeq2 result object for DESeq2 analysis; for other analysis, it will generate a \code{data.frame} object.
 }
 \description{
 \code{Inference_merip} is a function to infer methylation and differential methylation given merip datasets.

@@ -2,7 +2,7 @@
 #'
 #' @description \code{meRIP_QC_report} is used to generate a single quality control report for a summarized experiment object of MeRIP experiment.
 #'
-#' @details This function is an internal function, and it defines the behavior of a single QC report on a well formated summarized experiment object of count.
+#' @details The function can generate a Quality Control report on a well formated SummarizedExperiment object containing reads count matrix and the genomic locations of each row features.
 #' Under current version, \code{meRIP_QC_report} supports the generation of the following reports.
 #'
 #' 1. A reads number distribution plot.
@@ -28,7 +28,7 @@
 #' \code{IP_input} : a factor variable indicating whether the collumns belong to IP or input, the levels need to be c("input", "IP").
 #'
 #' @param txdb \code{TxDb} object of the corresponding \code{rowRanges}, this is either obtained from biocoductor or converted from the user provided GFF files.
-#' @param gtcoord A variable containing guitar coordinate, which is defined by the \pkg{Guitar} package.
+#' @param gtcoord Optional: A variable containing guitar coordinate, which is defined by the \pkg{Guitar} package. If not provided, the guitar coordinate will be automatically generated from txdb.
 #'
 #' Cui X, Wei Z, Zhang L, Liu H, Sun L, Zhang s, Huang Y and Meng J (2016). “Guitar: an R/Bioconductor package for gene annotation guided transcriptomic analysis of RNA related genomic features.” BioMed Research International.
 #'
@@ -51,10 +51,9 @@
 #'
 #' @param expected_change Optional: could be either "hyper" and "hypo", indicating the expected change of treated condition over input condition, this is useful when inference of the target sites of RNA modification writers or erasers from the MeRIP Seq data. Default setting is NULL.
 #' @param PCA_plot Whether to plot the PCA plot with DESeq2, the default setting is FALSE, it can be time consuming due to the required rlog transformation in DESeq2.
-#' @param row_count_filter A non negative integer number, the methylation sites with total count (row sums) smaller than the threshold will be filtered before the statistical inference, the default setting is 5.
+#' @param row_minimal_counts A non negative integer number, the methylation sites with total count (row sums) smaller than the threshold will be excluded from the statistical inference, the default setting is 10.
 #'
-#' The row filter is recommended when dealing with sparse count matrix, it can improve the computational efficiencies of the inference process; also, for QNB method, it can increase the staistical power.
-#' If the DM_method is selected to be "QNB", the rows with 0 total counts are automatically filtered.
+#' The row filter is recommended when dealing with sparse count matrix, it can improve the computational efficiencies of the inference process; occasionally, it can also improve the statistical power of the tests;
 #'
 #' @return This function will generate files of quality control reports under the directory provided by \code{save_dir}
 #'
@@ -74,6 +73,7 @@
 #' 6. If some one not provide guitar coordinate (gtcoord = NULL), make the coordinate being automatically generated from txdb....
 #' 7. Organize and merge into one html report.
 #' 8. Remove unnecessary export
+#' 9. A summarization purposed OLM on log2FC ~ GC_content_z + exon_length + stop_codon.
 #'
 #' @import DESeq2
 #' @import ggplot2
@@ -100,7 +100,7 @@ meRIP_QC_report <-
            DM_method = "DESeq2",
            expected_change = NULL,
            PCA_plot = FALSE,
-           mod_count_filter = 5
+           row_minimal_counts = 10
            ) {
     #0. directory
     dir_org = getwd()
@@ -115,7 +115,7 @@ meRIP_QC_report <-
 
     #3. A methylation profile report in tabular format based on DeSeq2 result.
     # Run Inference.
-    inf_result <- Inference_merip(se_M,MODE = ifelse(DM_analysis,"DM","Meth"),DM_METHOD = DM_method,PCA = PCA_plot,HDER = save_title, ROW_FILTER = mod_count_filter)
+    inf_result <- Inference_merip(se_M,MODE = ifelse(DM_analysis,"DM","Meth"),DM_METHOD = DM_method,PCA = PCA_plot,HDER = save_title, ROW_FILTER = row_minimal_counts)
 
     # Analysis Inference result and generate a decision table:
     Dcs_tb <- Decision_infresult(inf_result,log2FC_cutoff,p_threshold,fdr_threshold,min_num_mod,DM_analysis,expected_change,save_title)
@@ -147,8 +147,14 @@ meRIP_QC_report <-
     if(!is.null(GC_idx_feature)) Plot_GC_results(inf_result,GC_idx_feature,save_title)
 
     #5. Guitar plot for methylation sites.
+    #sample amount of insig equal to min_num_mod from the result.
+    Insig_keep_indx <- sample(which(inf_result$Decision == "Insig"),min_num_mod)
+
     Plot_ls_Gr <- as.list(split(rowRanges(se_M),inf_result$Decision))
+
     Plot_ls_Gr = Plot_ls_Gr[ names(Plot_ls_Gr) != "Insig" ]
+
+    Plot_ls_Gr$Insig = rowRanges(se_M)[Insig_keep_indx]
 
     if(!(is.null(gtcoord) & is.null(txdb))) {
       if(is.null(gtcoord)) {gtcoord <- Guitar::makeGuitarCoordsFromTxDb(txdb)}

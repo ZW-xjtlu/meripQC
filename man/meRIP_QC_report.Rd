@@ -9,7 +9,7 @@ meRIP_QC_report(se_M, txdb = NULL, save_title = "modX",
   fdr_threshold = NULL, log2FC_cutoff = 0, min_num_mod = 10000,
   save_inference_result = TRUE, GC_idx_feature = NULL,
   DM_analysis = FALSE, DM_method = "DESeq2", expected_change = NULL,
-  PCA_plot = FALSE, mod_count_filter = 0)
+  PCA_plot = FALSE, row_minimal_counts = 10)
 }
 \arguments{
 \item{se_M}{A \code{SummarizedExperiment} object containing the counts of each modification sites of each bam files. Appropriate \code{colData} and \code{rowRanges} should be available.
@@ -25,7 +25,7 @@ Specifically, \code{colData} should be a \code{DataFrame} object including the f
 
 \item{save_dir}{A character string indicating the directory to save the report, by default it is the current working directory.}
 
-\item{gtcoord}{A variable containing guitar coordinate, which is defined by the \pkg{Guitar} package.
+\item{gtcoord}{Optional: A variable containing guitar coordinate, which is defined by the \pkg{Guitar} package. If not provided, the guitar coordinate will be automatically generated from txdb.
 
 Cui X, Wei Z, Zhang L, Liu H, Sun L, Zhang s, Huang Y and Meng J (2016). “Guitar: an R/Bioconductor package for gene annotation guided transcriptomic analysis of RNA related genomic features.” BioMed Research International.}
 
@@ -54,10 +54,9 @@ Liu, L., et al. (2017). "QNB: differential RNA methylation analysis for count-ba
 
 \item{PCA_plot}{Whether to plot the PCA plot with DESeq2, the default setting is FALSE, it can be time consuming due to the required rlog transformation in DESeq2.}
 
-\item{row_count_filter}{A non negative integer number, the methylation sites with total count (row sums) smaller than the threshold will be filtered before the statistical inference, the default setting is 0 (no filter).
+\item{row_minimal_counts}{A non negative integer number, the methylation sites with total count (row sums) smaller than the threshold will be excluded from the statistical inference, the default setting is 10.
 
-The row filter is recommended when dealing with sparse count matrix, it can improve the computational efficiencies of the inference process; also, for QNB method, it can increase the staistical power.
-If the DM_method is selected to be "QNB", the rows with 0 total counts are automatically filtered.}
+The row filter is recommended when dealing with sparse count matrix, it can improve the computational efficiencies of the inference process; occasionally, it can also improve the statistical power of the tests;}
 }
 \value{
 This function will generate files of quality control reports under the directory provided by \code{save_dir}
@@ -66,7 +65,7 @@ This function will generate files of quality control reports under the directory
 \code{meRIP_QC_report} is used to generate a single quality control report for a summarized experiment object of MeRIP experiment.
 }
 \details{
-This function is an internal function, and it defines the behavior of a single QC report on a well formated summarized experiment object of count.
+The function can generate a Quality Control report on a well formated SummarizedExperiment object containing reads count matrix and the genomic locations of each row features.
 Under current version, \code{meRIP_QC_report} supports the generation of the following reports.
 
 1. A reads number distribution plot.
@@ -97,6 +96,7 @@ min_num_mod = 1000)
 6. If some one not provide guitar coordinate (gtcoord = NULL), make the coordinate being automatically generated from txdb....
 7. Organize and merge into one html report.
 8. Remove unnecessary export
+9. A summarization purposed OLM on log2FC ~ GC_content_z + exon_length + stop_codon.
 
 }
 \seealso{

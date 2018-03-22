@@ -1,18 +1,13 @@
 Package: meripQC
 Type: Package
-Title: Generate quality control reports for MeRIP-seq datasets.
-Version: 0.1.0
+Title: Quality control and inference for m6A-seq datasets.
+Version: 0.5.6
 Author: Zhen Wei
 Maintainer: Zhen Wei <zhen.wei10@icloud.com>
-Description: This is a package for QC (quality control) on MeRIP-seq data.
-License: Public domain
-Imports: ggplot2,
-    GenomicFeatures,
-    GenomicAlignments,
-    Guitar,
-    DESeq2,
-    QNB,
-    exomePeak
+Description: A package to quality control on methylation and differential methylation of m6A-seq. 
+License: GPL (>= 2)
+Imports: ggplot2, GenomicFeatures, GenomicAlignments, Guitar, DESeq2, QNB, exomePeak
 Encoding: UTF-8
 LazyData: true
+URL: http://github.com/ZhenWei10/meripQC
 RoxygenNote: 6.0.1
