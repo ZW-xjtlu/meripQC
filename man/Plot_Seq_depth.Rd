@@ -7,7 +7,7 @@
 Plot_Seq_depth(SE_M, HDER)
 }
 \arguments{
-\item{SE_M}{A \code{SummarizedExperiment} object with 2 necessary collumns in \code{colData}: c( "IP_input", "SRR_RUN" ).}
+\item{SE_M}{A \code{SummarizedExperiment} object with 2 necessary columns in \code{colData}: c( "IP_input", "SRR_RUN" ).}
 
 \item{HDER}{Determine the content of the title and the file name of the plot saved.}
 }

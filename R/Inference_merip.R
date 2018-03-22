@@ -1,7 +1,7 @@
 #' @title Analysis MeRIP datasets with DESeq2.
 #'
 #' @description \code{Inference_merip} is a function to infer methylation and differential methylation given merip datasets.
-#' @param SE_M A \code{SummarizedExperiment} object with 1 necessary collumn in \code{colData} named "IP_input", its content should be a character vector consists of 2 values: c("IP", "input").
+#' @param SE_M A \code{SummarizedExperiment} object with 1 necessary column in \code{colData} named "IP_input", its content should be a character vector consists of 2 values: c("IP", "input").
 #' @param DM_METHOD A character string indicating the statistical method used in differential methylation analysis, could be one in c("DESeq2","QNB").
 #' @param PCA Wheather to save the PCA plot after rlog transformation, default is FALSE, the plot will not be generated when \code{DM_METHOD} = "QNB" while the \code{MODE} = "DM".
 #' @param HDER What should be the header of the PCA plot, applied when \code{PCA} = TRUE.
@@ -13,7 +13,7 @@
 #'
 #' We don't get this by contrast, because the information is already contained in coefficient estimate under the design above, and we don't need to linear combine (or a linear combination by t(c(0,0,0,1))) the estimates to get it.
 #'
-#' An additional collumn c("Perturbation") is necessary for this option, the Perturbation collumn has to include character "C" for control condition.
+#' An additional column c("Perturbation") is necessary for this option, the Perturbation column has to include character "C" for control condition.
 #'
 #' @return A DESeq2 result object for DESeq2 analysis; for other analysis, it will generate a \code{data.frame} object.
 #' @import DESeq2
@@ -91,7 +91,7 @@ if(MODE == "Meth") {
 
    if(any(Rep_Num != min(Rep_Num))) {
 
-     combine_collumns_to <- function(DF_x,column_target_num) {
+     combine_columns_to <- function(DF_x,column_target_num) {
        while(ncol(DF_x) > column_target_num) {
        DF_x[,1] = DF_x[,1] + DF_x[,2]
        DF_x = data.frame( cbind(DF_x[,-2]) )
@@ -99,13 +99,13 @@ if(MODE == "Meth") {
        return(DF_x)
      }
 
-     C_IP = combine_collumns_to(C_IP, min(Rep_Num))
+     C_IP = combine_columns_to(C_IP, min(Rep_Num))
 
-     T_IP = combine_collumns_to(C_IP, min(Rep_Num))
+     T_IP = combine_columns_to(C_IP, min(Rep_Num))
 
-     C_input = combine_collumns_to(C_input, min(Rep_Num))
+     C_input = combine_columns_to(C_input, min(Rep_Num))
 
-     T_input = combine_collumns_to(T_input, min(Rep_Num))
+     T_input = combine_columns_to(T_input, min(Rep_Num))
 
    }
 

@@ -8,7 +8,7 @@ Inference_merip(SE_M, MODE = "Meth", DM_METHOD = "DESeq2", PCA = FALSE,
   HDER = "Unknown", ROW_FILTER = 0)
 }
 \arguments{
-\item{SE_M}{A \code{SummarizedExperiment} object with 1 necessary collumn in \code{colData} named "IP_input", its content should be a character vector consists of 2 values: c("IP", "input").}
+\item{SE_M}{A \code{SummarizedExperiment} object with 1 necessary column in \code{colData} named "IP_input", its content should be a character vector consists of 2 values: c("IP", "input").}
 
 \item{MODE}{Could be either "Meth" or "DM", the later will conduct differential methylation analysis with the design:
 
@@ -18,7 +18,7 @@ The result is just the differences in conditioning effect, or the statistics for
 
 We don't get this by contrast, because the information is already contained in coefficient estimate under the design above, and we don't need to linear combine (or a linear combination by t(c(0,0,0,1))) the estimates to get it.
 
-An additional collumn c("Perturbation") is necessary for this option, the Perturbation collumn has to include character "C" for control condition.}
+An additional column c("Perturbation") is necessary for this option, the Perturbation column has to include character "C" for control condition.}
 
 \item{DM_METHOD}{A character string indicating the statistical method used in differential methylation analysis, could be one in c("DESeq2","QNB").}
 

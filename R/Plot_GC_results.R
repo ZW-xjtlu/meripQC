@@ -1,7 +1,7 @@
 #' @title Plot GC content bias plot based on DESeq2 result.
 #'
 #' @description \code{DESeq2_merip} is an internal function used to infer methylation and differential methylation given merip datasets.
-#' @param DS_RES A \code{DESeqResults} object with additional factor collumn "Decision".
+#' @param DS_RES A \code{DESeqResults} object with additional factor column "Decision".
 #' @param GC_IDX A numeric vector indicate the GC content of each individual feature.
 #' @param HDER Determine the content of the title and the file name of the plot saved.
 #'

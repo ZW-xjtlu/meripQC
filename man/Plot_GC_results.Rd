@@ -7,7 +7,7 @@
 Plot_GC_results(DS_RES, GC_IDX, HDER)
 }
 \arguments{
-\item{DS_RES}{A \code{DESeqResults} object with additional factor collumn "Decision".}
+\item{DS_RES}{A \code{DESeqResults} object with additional factor column "Decision".}
 
 \item{GC_IDX}{A numeric vector indicate the GC content of each individual feature.}
 

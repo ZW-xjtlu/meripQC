@@ -1,18 +1,18 @@
-#' @title Plot GC content distribution of features by collumns.
+#' @title Plot GC content distribution of features by columns.
 #'
 #' @description \code{Plot_Seq_depth} is an internal function used to generate a GC content distribution plot given an input \code{SummarizedExperiment} object.
 #'
-#' @param SE_M A \code{SummarizedExperiment} object with 2 necessary collumns in \code{colData}: c( "IP_input", "SRR_RUN" ).
+#' @param SE_M A \code{SummarizedExperiment} object with 2 necessary columns in \code{colData}: c( "IP_input", "SRR_RUN" ).
 #' @param GC_IDX A numeric vector indicate the GC content of each individual feature.
 #' @param HDER Determine the content of the title and the file name of the plot saved.
 #' @param ANNOT Whether annotate the plot with additional batch or treatment information,
-#' in this version, it depends on the collumn of c("Perturbation_detail") in the \code{colData}.
+#' in this version, it depends on the column of c("Perturbation_detail") in the \code{colData}.
 #'
 #' @return A pdf diagram saved under the current working directory.
 #'
 #' @export
 
-Plot_GC_collumns <- function(SE_M,GC_IDX,HDER,ANNOT = F) {
+Plot_GC_columns <- function(SE_M,GC_IDX,HDER,ANNOT = F) {
 
 Plot_df  <- reshape2::melt(assay(SE_M))
 Plot_df$GC_cont = GC_IDX[Plot_df$Var1]

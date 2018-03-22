@@ -2,7 +2,7 @@
 #'
 #' @description \code{Plot_Seq_depth} is an internal function used to generate a sequencing depth plot given an input SummarizedExperiment object.
 #'
-#' @param SE_M A \code{SummarizedExperiment} object with 2 necessary collumns in \code{colData}: c( "IP_input", "SRR_RUN" ).
+#' @param SE_M A \code{SummarizedExperiment} object with 2 necessary columns in \code{colData}: c( "IP_input", "SRR_RUN" ).
 #' @param HDER Determine the content of the title and the file name of the plot saved.
 #'
 #' @return A pdf diagram saved under the current working directory.

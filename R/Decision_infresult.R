@@ -9,9 +9,9 @@
 #' @param Min_mod Minimum number of features returned, when this is smaller than the cut-off results, additional features are called by the order of p values.
 #' @param DM Whether the result is differential methylation analysis, default is FALSE.
 #' @param Exp_dir This parameter is filled when DM = TRUE, can be either "hyper" or "hypo".
-#' @param HDER Determine the ID collumn of the generated table.
+#' @param HDER Determine the ID column of the generated table.
 #'
-#' @return A \code{data.frame} object indicating the collumn and cut-off value used for desicion, also it includes the number of positive sites in both directions based on the decision.
+#' @return A \code{data.frame} object indicating the column and cut-off value used for desicion, also it includes the number of positive sites in both directions based on the decision.
 #
 #' @export
 

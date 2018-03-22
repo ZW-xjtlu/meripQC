@@ -2,10 +2,10 @@
 
 export(Decision_infresult)
 export(Inference_merip)
-export(Plot_GC_collumns)
+export(Plot_GC_columns)
 export(Plot_GC_results)
 export(Plot_Seq_depth)
-export(Plot_collumn_dist)
+export(Plot_column_marginal)
 export(Plot_ex_lengths)
 export(meRIP_QC_report)
 export(meRIP_count)

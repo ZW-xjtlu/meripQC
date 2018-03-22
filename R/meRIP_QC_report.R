@@ -7,7 +7,7 @@
 #'
 #' 1. A reads number distribution plot.
 #'
-#' 2. A GC content diagnosis plot for single collumns of SummarizedExperiment.
+#' 2. A GC content diagnosis plot for single columns of SummarizedExperiment.
 #'
 #' 3. A methylation profile report in tabular format based on DeSeq2 result.
 #'
@@ -18,14 +18,14 @@
 #' 6. Exon length distribution for methylation sites.
 #'
 #'
-#' @seealso This function is called by \code{meRIP_QC}
+#' @seealso many.
 #'
 #' @param se_M A \code{SummarizedExperiment} object containing the counts of each modification sites of each bam files. Appropriate \code{colData} and \code{rowRanges} should be available.
-#' Specifically, \code{colData} should be a \code{DataFrame} object including the following collumns:
+#' Specifically, \code{colData} should be a \code{DataFrame} object including the following columns:
 #'
-#' \code{SRR_RUN} : a factor variable that uniquely indentify each collumns of the count matrix, could be ID for each bam files.
+#' \code{SRR_RUN} : a factor variable that uniquely indentify each columns of the count matrix, could be ID for each bam files.
 #'
-#' \code{IP_input} : a factor variable indicating whether the collumns belong to IP or input, the levels need to be c("input", "IP").
+#' \code{IP_input} : a factor variable indicating whether the columns belong to IP or input, the levels need to be c("input", "IP").
 #'
 #' @param txdb \code{TxDb} object of the corresponding \code{rowRanges}, this is either obtained from biocoductor or converted from the user provided GFF files.
 #' @param gtcoord Optional: A variable containing guitar coordinate, which is defined by the \pkg{Guitar} package. If not provided, the guitar coordinate will be automatically generated from txdb.
@@ -110,8 +110,8 @@ meRIP_QC_report <-
     #1. A reads count bar plot.
     Plot_Seq_depth(se_M,save_title)
 
-    #2. A GC content diagnosis plot for single collumns of SummarizedExperiment.
-    if(!is.null(GC_idx_feature)) Plot_GC_collumns(se_M,GC_idx_feature,save_title,DM_analysis)
+    #2. A GC content diagnosis plot for single columns of SummarizedExperiment.
+    if(!is.null(GC_idx_feature)) Plot_GC_columns(se_M,GC_idx_feature,save_title,DM_analysis)
 
     #3. A methylation profile report in tabular format based on DeSeq2 result.
     # Run Inference.
