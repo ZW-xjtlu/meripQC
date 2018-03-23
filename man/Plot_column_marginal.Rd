@@ -4,13 +4,13 @@
 \alias{Plot_column_marginal}
 \title{Plot the column wise data distribution.}
 \usage{
-Plot_column_marginal(M, TYPE = "box", HDER = "", GROUP_LABEL = NULL,
+Plot_column_marginal(M, TYPE = "violine", HDER = "", GROUP_LABEL = NULL,
   VALUE_LABEL = "value")
 }
 \arguments{
 \item{M}{A \code{matrix}.}
 
-\item{TYPE}{Can be either "density" or "box".}
+\item{TYPE}{Can be one in "violine", "box", and "density".}
 
 \item{HDER}{The subtitle and the file name of the plot.}
 
@@ -19,7 +19,7 @@ Plot_column_marginal(M, TYPE = "box", HDER = "", GROUP_LABEL = NULL,
 \item{VALUE_LABEL}{Optional, The label for the entries of M.}
 }
 \value{
-A column wised density plot or box plot.
+A plot for column wised marginal distribution visualization.
 }
 \description{
 \code{Plot_column_marginal} is a function used to plot the columned wise data distributions. (marginal distribution for each sample)
@@ -30,6 +30,8 @@ By default, the column names of the matrix M will be used as the sample labels, 
 \examples{
 Matrix_ex <- matrix(rnorm(9000),300,30)
 Group_lab <- paste0( "V_",rep(1:10,each = 3) )
+
+Plot_column_marginal( Matrix_ex, "violine", "Test2", Group_lab )
 Plot_column_marginal( Matrix_ex, "density", "Test1", Group_lab )
 Plot_column_marginal( Matrix_ex, "box", "Test2", Group_lab )
 

@@ -22,7 +22,6 @@
 #'
 #' @import ggplot2
 #' @import ggdendro
-#' @importFrom reshape2 melt
 #' @export
 
 Plot_column_joint <- function(M, METRIC = "euclidean",VISUAL = "MDS", HDER = "", GROUP_LABEL = NULL){
@@ -52,12 +51,16 @@ Plot_column_joint <- function(M, METRIC = "euclidean",VISUAL = "MDS", HDER = "",
 
   ywidth <- (yrange[2]-yrange[1])
 
+  dend_data$labels$label = as.character( dend_data$labels$label )
+
+  dend_data$labels$Group = GROUP_LABEL[match(dend_data$labels$label, colnames(M))]
+
   p <- ggplot(dend_data$segments) +
     geom_segment(aes(x = x, y = y, xend = xend, yend = yend)) +
     geom_text(data = dend_data$labels,
-              aes(x, y - .02, label = label, colour = GROUP_LABEL),
+              aes(x, y - .02, label = label, colour = Group),
               hjust = 1.05, angle = 90, size = 2.3) +
-    ylim(-3 -.5 * max(nchar(as.character(colnames(M)))),
+    ylim(-.03 * ywidth * max(nchar(as.character(colnames(M)))) ,
          yrange[2]+.25*ywidth) + theme_classic() +
     labs(x ="", y = "height",
          title = paste0("Collumn dendrogram with metric: ", METRIC),
@@ -97,8 +100,9 @@ Plot_column_joint <- function(M, METRIC = "euclidean",VISUAL = "MDS", HDER = "",
            subtitle = HDER) +
       ylim(max(plot_df$PC_2) +1 ,min(plot_df$PC_2) - 1)
 
-    figheight =  4.5 + .12* ceiling(length( unique(GROUP_LABEL) )/5)
-    ggsave(paste0(HDER,"_mds.pdf"),p1,width = 6.35,height = figheight)
+    figwidth = 5 + .05 * max(nchar(as.character( GROUP_LABEL ))) * min(5, length( unique(colnames(M)) ))
+    figheight = .6 * figwidth + .12* ceiling(length( unique(GROUP_LABEL) )/5)
+    ggsave(paste0(HDER,"_mds.pdf"),p1,width = figwidth,height = figheight)
 
   }
 
