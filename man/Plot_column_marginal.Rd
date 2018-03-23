@@ -4,7 +4,8 @@
 \alias{Plot_column_marginal}
 \title{Plot the column wise data distribution.}
 \usage{
-Plot_column_marginal(M, TYPE = "box", HDER = "", GROUP_LABEL = NULL)
+Plot_column_marginal(M, TYPE = "box", HDER = "", GROUP_LABEL = NULL,
+  VALUE_LABEL = "value")
 }
 \arguments{
 \item{M}{A \code{matrix}.}
@@ -14,6 +15,8 @@ Plot_column_marginal(M, TYPE = "box", HDER = "", GROUP_LABEL = NULL)
 \item{HDER}{The subtitle and the file name of the plot.}
 
 \item{GROUP_LABEL}{Optional, a vector used for colour labeling or faceting the box plot and density plot, the length should equal to the column number of M.}
+
+\item{VALUE_LABEL}{Optional, The label for the entries of M.}
 }
 \value{
 A column wised density plot or box plot.

@@ -4,19 +4,19 @@
 \alias{Plot_column_joint}
 \title{Plot the joint distribution between matrix columns.}
 \usage{
-Plot_column_joint(M, METRIC = "euclidean", VISUAL = "dendrogram",
-  HDER = "", GROUP_LABEL = NULL)
+Plot_column_joint(M, METRIC = "euclidean", VISUAL = "MDS", HDER = "",
+  GROUP_LABEL = NULL)
 }
 \arguments{
 \item{M}{A \code{matrix}.}
 
-\item{METRIC}{Can be either "euclidean" or "pearson". The later is simply the euclidean distance after rescale the columns.}
-
-\item{VISUAL}{Can be either "dendrogram" or "MDS".}
+\item{METRIC}{The metric used in clustering, can be one in "euclidean", "pearson", and "binary". The pearson metric is calculated as the euclidean metric after rescaling the columns.}
 
 \item{HDER}{The subtitle and the file name of the plot.}
 
 \item{GROUP_LABEL}{Optional, a vector used for colour labeling or faceting the dendrogram or MDS plot.}
+
+\item{CLUSTER}{The clustering method, can be one in "MDS" and  "dendrogram".}
 }
 \value{
 A plot for column wised clustering analysis.
@@ -30,8 +30,8 @@ By default, the column names of the matrix M will be used as the sample labels, 
 \examples{
 Matrix_ex <- matrix(rnorm(9000),300,30)
 Group_lab <- paste0( "V_",rep(1:10,each = 3) )
-Plot_column_joint( Matrix_ex, "density", "Test1", Group_lab )
-Plot_column_joint( Matrix_ex, "box", "Test2", Group_lab )
+Plot_column_joint( Matrix_ex, "euclidean", "dendrogram", "Test1", Group_lab )
+Plot_column_joint( Matrix_ex, "pearson", "MDS", "Test2", Group_lab )
 
 }
 \seealso{
