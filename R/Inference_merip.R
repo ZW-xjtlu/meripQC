@@ -44,6 +44,7 @@ SE_M <- SE_M[!Omit_indx,]
 if(MODE == "Meth") {
 
   if(CQN) {
+  require(cqn)
  #Use robust estimate of size factor as the input of cqn.
   GC_size_factors <- rep(NA,length = nrow(SE_M))
   GC_index <- GC_INDX[!Omit_indx]
@@ -155,7 +156,6 @@ if(MODE == "Meth") {
   }
 
     if (CQN) {
-      require(cqn)
 
       DS_result  <- results(dds)
 
