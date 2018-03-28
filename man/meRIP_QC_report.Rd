@@ -9,7 +9,7 @@ meRIP_QC_report(se_M, txdb = NULL, save_title = "modX",
   fdr_threshold = NULL, log2FC_cutoff = 0, min_num_mod = 10000,
   save_inference_result = TRUE, GC_idx_feature = NULL,
   DM_analysis = FALSE, DM_method = "DESeq2", expected_change = NULL,
-  PCA_plot = FALSE, row_minimal_counts = 10)
+  PCA_plot = FALSE, row_minimal_counts = 10, cqn = FALSE)
 }
 \arguments{
 \item{se_M}{A \code{SummarizedExperiment} object containing the counts of each modification sites of each bam files. Appropriate \code{colData} and \code{rowRanges} should be available.
@@ -57,6 +57,12 @@ Liu, L., et al. (2017). "QNB: differential RNA methylation analysis for count-ba
 \item{row_minimal_counts}{A non negative integer number, the methylation sites with total count (row sums) smaller than the threshold will be excluded from the statistical inference, the default setting is 10.
 
 The row filter is recommended when dealing with sparse count matrix, it can improve the computational efficiencies of the inference process; occasionally, it can also improve the statistical power of the tests;}
+
+\item{cqn}{indicate wheather to normalize GC content dependency of methylation / differential methylation log2FC, default is FALSE.
+
+Select FALSE if you want to diagnose GC content batch effect.
+
+Select TRUE if you want to send the inference result to downstream analysis.}
 }
 \value{
 This function will generate files of quality control reports under the directory provided by \code{save_dir}

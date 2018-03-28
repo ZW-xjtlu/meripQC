@@ -6,6 +6,8 @@
 #' @param PCA Wheather to save the PCA plot after rlog transformation, default is FALSE, the plot will not be generated when \code{DM_METHOD} = "QNB" while the \code{MODE} = "DM".
 #' @param HDER What should be the header of the PCA plot, applied when \code{PCA} = TRUE.
 #' @param MODE Could be either "Meth" or "DM", the later will conduct differential methylation analysis with the design:
+#' @param CQN Wheather to normalize GC content dependency of methylation / differential methylation log2FC, default is FALSE.
+#' @param GC_INDX The GC content values for each features (rows) of the count matrix, it is required when CQN = TRUE.
 #'
 #' log2(Q) = intercept + I(Treated) + I(IP) + I(IP):I(Treated).
 #'
@@ -17,8 +19,7 @@
 #'
 #' @return A DESeq2 result object for DESeq2 analysis; for other analysis, it will generate a \code{data.frame} object.
 #' @import DESeq2
-#' @import QNB
-#' @import exomePeak
+#' @import cqn
 #' @import ggplot2
 #
 #' @export
@@ -28,7 +29,9 @@ Inference_merip <- function(SE_M,
                               DM_METHOD = "DESeq2",
                               PCA = FALSE,
                              HDER = "Unknown",
-                            ROW_FILTER = 0) {
+                            ROW_FILTER = 0,
+                            CQN = FALSE,
+                            GC_INDX = NULL ) {
 
 SE_M$IPinput = SE_M$IP_input
 
@@ -40,22 +43,99 @@ SE_M <- SE_M[!Omit_indx,]
 
 if(MODE == "Meth") {
 
+  if(CQN) {
+ #Use robust estimate of size factor as the input of cqn.
+  GC_size_factors <- rep(NA,length = nrow(SE_M))
+  GC_index <- GC_INDX[!Omit_indx]
+  Omit_gc_na_indx <- is.na( GC_index)
+
+  cqnObject <- suppressMessages( cqn(assay(SE_M)[!Omit_gc_na_indx,],
+                    lengths = rep(100,nrow(SE_M))[!Omit_gc_na_indx],
+                    lengthMethod = "fixed",
+                    x = GC_index[!Omit_gc_na_indx],
+                    sizeFactors = estimateSizeFactorsForMatrix(assay(SE_M)[!Omit_gc_na_indx,]),
+                    verbose = FALSE) )
+
+  cqnOffset <- cqnObject$glm.offset
+  normFactors <- exp(cqnOffset)
+  normFactors <- normFactors / exp(rowMeans(log(normFactors)))
+
+  Cov = ~ IPinput
+  dds = suppressMessages( DESeqDataSet(se = SE_M[!Omit_gc_na_indx,], design = Cov) )
+  normalizationFactors(dds) <- normFactors
+  dds$IPinput <- relevel(dds$IPinput, "input")
+  dds <- suppressMessages( DESeq(dds) )
+
+
+  } else {
+
   Cov = ~ IPinput
   dds = suppressMessages( DESeqDataSet(se = SE_M, design = Cov) )
   dds$IPinput <- relevel(dds$IPinput, "input")
   dds <- suppressMessages( DESeq(dds) )
 
+  }
+
   if(PCA) {
+
     INTGRP = c("IPinput", if(any(colnames(colData(SE_M)) == "Perturbation_detail")){"Perturbation_detail"}else{NULL})
     rld <- rlog(dds)
     ggsave(paste0(HDER,"_PCA.pdf"), plotPCA(rld,intgroup = INTGRP) + theme_classic() + theme() + scale_color_brewer(palette = "Spectral"), width = 5, height = 5)
+
   }
 
-  inference_rst <- results(dds)
+
+  if (CQN) {
+
+  DS_result  <- results(dds)
+
+  inference_rst <- matrix(NA,nrow = nrow(SE_M), ncol = ncol(DS_result))
+
+  colnames(inference_rst) <- colnames(DS_result)
+
+  inference_rst <- as.data.frame(inference_rst)
+
+  inference_rst[!Omit_gc_na_indx,] <- as.data.frame( results(dds) )
 
   } else {
 
-    if (DM_METHOD == "DESeq2") {
+  inference_rst <- as.data.frame( results(dds) )
+
+  }
+
+
+  } else {
+
+  if (DM_METHOD == "DESeq2") {
+
+    if(CQN) {
+      #Use robust estimate of size factor as the input of cqn.
+      GC_size_factors <- rep(NA,length = nrow(SE_M))
+      GC_index <- GC_INDX[!Omit_indx]
+      Omit_gc_na_indx <- is.na( GC_index)
+
+      cqnObject <- suppressMessages( cqn(assay(SE_M)[!Omit_gc_na_indx,],
+                                         lengths = rep(100,nrow(SE_M))[!Omit_gc_na_indx],
+                                         lengthMethod = "fixed",
+                                         x = GC_index[!Omit_gc_na_indx],
+                                         sizeFactors = estimateSizeFactorsForMatrix(assay(SE_M)[!Omit_gc_na_indx,]),
+                                         verbose = FALSE) )
+
+      cqnOffset <- cqnObject$glm.offset
+      normFactors <- exp(cqnOffset)
+      normFactors <- normFactors / exp(rowMeans(log(normFactors)))
+
+      Pert_u = as.character(SE_M$Perturbation)
+      Pert_u[Pert_u != "C"] = "Treated"
+      SE_M$Perturbation = factor( Pert_u )
+      Cov = ~ Perturbation + IPinput + Perturbation:IPinput
+      dds = suppressMessages( DESeqDataSet(se = SE_M[!Omit_gc_na_indx,], design = Cov) )
+      normalizationFactors(dds) <- normFactors
+      dds$IPinput <- relevel(dds$IPinput, "input")
+      dds$Perturbation <- relevel(dds$Perturbation, "C")
+      dds <- suppressMessages( DESeq(dds) )
+
+    } else {
 
   Pert_u = as.character(SE_M$Perturbation)
   Pert_u[Pert_u != "C"] = "Treated"
@@ -66,17 +146,35 @@ if(MODE == "Meth") {
   dds$Perturbation <- relevel(dds$Perturbation, "C")
   dds <- suppressMessages( DESeq(dds) )
 
+    }
   if(PCA) {
     INTGRP = c("IPinput","Perturbation")
     rld <- rlog(dds)
     ggsave(paste0(HDER,"_PCA.pdf"), plotPCA(rld,intgroup = INTGRP) + theme_classic() + theme() + scale_color_brewer(palette = "Spectral"), width = 5, height = 5)
   }
 
-  inference_rst <- results(dds, name="PerturbationTreated.IPinputIP")
+    if (CQN) {
 
+      DS_result  <- results(dds)
+
+      inference_rst <- matrix(NA,nrow = nrow(SE_M), ncol = ncol(DS_result))
+
+      colnames(inference_rst) <- colnames(DS_result)
+
+      inference_rst <- as.data.frame(inference_rst)
+
+      inference_rst[!Omit_gc_na_indx,] <- as.data.frame( results(dds) )
+
+    } else {
+
+      inference_rst <- as.data.frame( results(dds) )
+
+    }
   }
 
   if (DM_METHOD == "QNB") {
+    require(QNB)
+
     C_indx = SE_M$Perturbation == "C"
     input_indx = SE_M$IPinput == "input"
 

@@ -55,6 +55,13 @@
 #'
 #' The row filter is recommended when dealing with sparse count matrix, it can improve the computational efficiencies of the inference process; occasionally, it can also improve the statistical power of the tests;
 #'
+#' @param cqn indicate wheather to normalize GC content dependency of methylation / differential methylation log2FC, default is FALSE.
+#'
+#'Select FALSE if you want to diagnose GC content batch effect.
+#'
+#'Select TRUE if you want to send the inference result to downstream analysis.
+#'
+#'
 #' @return This function will generate files of quality control reports under the directory provided by \code{save_dir}
 #'
 #' @examples
@@ -100,8 +107,15 @@ meRIP_QC_report <-
            DM_method = "DESeq2",
            expected_change = NULL,
            PCA_plot = FALSE,
-           row_minimal_counts = 10
+           row_minimal_counts = 10,
+           cqn = FALSE
            ) {
+    #Check first
+
+    stopifnot( !cqn | !is.null(GC_idx_feature) )
+
+    stopifnot( is.null(GC_idx_feature) | length(GC_idx_feature) == nrow(se_M) )
+
     #0. directory
     dir_org = getwd()
     if(!dir.exists(save_dir)) dir.create(save_dir)
@@ -115,7 +129,7 @@ meRIP_QC_report <-
 
     #3. A methylation profile report in tabular format based on DeSeq2 result.
     # Run Inference.
-    inf_result <- Inference_merip(se_M,MODE = ifelse(DM_analysis,"DM","Meth"),DM_METHOD = DM_method,PCA = PCA_plot,HDER = save_title, ROW_FILTER = row_minimal_counts)
+    inf_result <- Inference_merip(se_M,MODE = ifelse(DM_analysis,"DM","Meth"),DM_METHOD = DM_method,PCA = PCA_plot,HDER = save_title, ROW_FILTER = row_minimal_counts, CQN = cqn, GC_INDX = GC_idx_feature)
 
     # Analysis Inference result and generate a decision table:
     Dcs_tb <- Decision_infresult(inf_result,log2FC_cutoff,p_threshold,fdr_threshold,min_num_mod,DM_analysis,expected_change,save_title)

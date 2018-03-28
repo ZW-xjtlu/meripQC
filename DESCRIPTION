@@ -6,8 +6,9 @@ Author: Zhen Wei
 Maintainer: Zhen Wei <zhen.wei10@icloud.com>
 Description: A package to quality control on methylation and differential methylation of m6A-seq. 
 License: GPL (>= 2)
-Imports: ggplot2, GenomicFeatures, DESeq2, ggdendro, Guitar
+Imports: ggplot2, GenomicFeatures, DESeq2, ggdendro, Guitar, cqn
 Suggests: QNB, exomePeak, GenomicAlignments
+Depends: SummarizedExperiment
 Encoding: UTF-8
 LazyData: true
 URL: http://github.com/ZhenWei10/meripQC
