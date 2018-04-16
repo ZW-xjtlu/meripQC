@@ -5,7 +5,7 @@
 \title{Plot the joint distribution between matrix columns.}
 \usage{
 Plot_column_joint(M, METRIC = "euclidean", VISUAL = "MDS", HDER = "",
-  GROUP_LABEL = NULL)
+  GROUP_LABEL = NULL, ROW_VAR_Q = NULL)
 }
 \arguments{
 \item{M}{A \code{matrix}.}
@@ -15,6 +15,8 @@ Plot_column_joint(M, METRIC = "euclidean", VISUAL = "MDS", HDER = "",
 \item{HDER}{The subtitle and the file name of the plot.}
 
 \item{GROUP_LABEL}{Optional, a vector used for colour labeling or faceting the dendrogram or MDS plot.}
+
+\item{ROW_VAR_Q}{Optional, a real value between 0 and 1, indicating the quantile of row variance used to filter the rows.}
 
 \item{CLUSTER}{The clustering method, can be one in "MDS" and  "dendrogram".}
 }

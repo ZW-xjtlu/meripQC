@@ -6,6 +6,7 @@
 #' @param CLUSTER The clustering method, can be one in "MDS" and  "dendrogram".
 #' @param HDER The subtitle and the file name of the plot.
 #' @param GROUP_LABEL Optional, a vector used for colour labeling or faceting the dendrogram or MDS plot.
+#' @param ROW_VAR_Q Optional, a real value between 0 and 1, indicating the quantile of row variance used to filter the rows.
 #'
 #' @details By default, the column names of the matrix M will be used as the sample labels, other wise, it will use V_{1:ncol(M)}.
 #'
@@ -24,7 +25,7 @@
 #' @import ggdendro
 #' @export
 
-Plot_column_joint <- function(M, METRIC = "euclidean",VISUAL = "MDS", HDER = "", GROUP_LABEL = NULL){
+Plot_column_joint <- function(M, METRIC = "euclidean",VISUAL = "MDS", HDER = "", GROUP_LABEL = NULL, ROW_VAR_Q = NULL){
   stopifnot(METRIC %in% c("euclidean","pearson","binary"))
   stopifnot(VISUAL %in% c("dendrogram","MDS"))
   stopifnot(length(HDER) == 1)
@@ -33,6 +34,11 @@ Plot_column_joint <- function(M, METRIC = "euclidean",VISUAL = "MDS", HDER = "",
 
   if(!is.null(GROUP_LABEL)) {stopifnot( is.vector( GROUP_LABEL ) & (length(GROUP_LABEL) ==  ncol(M)) )} else{
     GROUP_LABEL = colnames(M)
+  }
+
+  if(!is.null(ROW_VAR_Q)){
+  rowvars <- rowVars(M,na.rm = T)
+  M = M[rowvars > quantile(rowvars,ROW_VAR_Q,na.rm = T),]
   }
 
   if(METRIC == "pearson"){
@@ -101,7 +107,7 @@ Plot_column_joint <- function(M, METRIC = "euclidean",VISUAL = "MDS", HDER = "",
       ylim(max(plot_df$PC_2) +1 ,min(plot_df$PC_2) - 1)
 
     figwidth = 5 + .05 * max(nchar(as.character( GROUP_LABEL ))) * min(5, length( unique(colnames(M)) ))
-    figheight = .6 * figwidth + .12* ceiling(length( unique(GROUP_LABEL) )/5)
+    figheight = .6 * figwidth + .12* ceiling(length( unique(GROUP_LABEL) )/5) + .03 * nrow(plot_df)
     ggsave(paste0(HDER,"_mds.pdf"),p1,width = figwidth,height = figheight)
 
   }

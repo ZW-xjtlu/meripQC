@@ -8,7 +8,7 @@ Decision_infresult(Inf_RES, log2FC_cut = 0, P_cut = 0.5, Padj_cut = NULL,
   Min_mod = 10000, DM = FALSE, Exp_dir = NULL, HDER)
 }
 \arguments{
-\item{Inf_RES}{a \code{DESeqResults} or similar object that contains the result statistics for either methylation or differential methylation.}
+\item{Inf_RES}{A \code{DESeqResults} or similar object that contains the result statistics for either methylation or differential methylation.}
 
 \item{log2FC_cut}{The log2 fold change cutoff of the inference result, default setting is 0.}
 
